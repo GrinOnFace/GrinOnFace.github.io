@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Интерактивная карта погоды</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<div id="container">
+		<div id="map"></div>
+		<div id="sidebar">
+			<h2>Поиск города</h2>
+			<form id="citySearch">
+				<input type="text" id="cityInput" placeholder="Введите название города">
+				<button type="submit">Поиск</button>
+			</form>
+			<h2>Избранные локации</h2>
+			<ul id="favorites"></ul>
+		</div>
+	</div>
+	<script src="script.js"></script>
+</body>
+</html>
