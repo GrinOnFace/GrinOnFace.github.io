@@ -4,7 +4,7 @@ var markers = [];
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
-
+	
 async function getWeatherData(lat, lng) {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&hourly=temperature_2m,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`;
 
@@ -58,6 +58,27 @@ function formatWeatherData(data) {
     return forecast;
 }
 
+function saveMarkersToLocalStorage() {
+    const markersData = markers.map(marker => {
+        const latLng = marker.getLatLng();
+        return {
+            lat: latLng.lat,
+            lng: latLng.lng
+        };
+    });
+    localStorage.setItem('savedMarkers', JSON.stringify(markersData));
+}
+
+async function loadMarkersFromLocalStorage() {
+    const savedMarkers = localStorage.getItem('savedMarkers');
+    if (savedMarkers) {
+        const markersData = JSON.parse(savedMarkers);
+        for (const markerData of markersData) {
+            await addMarker(markerData.lat, markerData.lng);
+        }
+    }
+}
+
 async function addMarker(lat, lng) {
     const weatherData = await getWeatherData(lat, lng);
     let popupContent = `<h3>Координаты: ${lat}, ${lng}</h3>`;
@@ -69,6 +90,7 @@ async function addMarker(lat, lng) {
 
     markers.push(marker);
     updateFavorites();
+    saveMarkersToLocalStorage(); 
 }
 
 map.on('click', async function(e) {
@@ -98,6 +120,7 @@ document.getElementById('citySearch').addEventListener('submit', async function(
     try {
         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`);
         const data = await response.json();
+		console.log(data);
 		
         if (data && data.length > 0) {
             const { lat, lon } = data[0];
@@ -110,4 +133,19 @@ document.getElementById('citySearch').addEventListener('submit', async function(
         console.error('Ошибка при поиске города:', error);
         alert('Произошла ошибка при поиске города');
     }
+});
+
+function clearAllMarkers() {
+    markers.forEach(marker => {
+        map.removeLayer(marker);
+    });
+    markers = [];
+    updateFavorites();
+    localStorage.removeItem('savedMarkers');
+}
+
+document.getElementById('clearMarkers').addEventListener('click', clearAllMarkers);
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadMarkersFromLocalStorage();
 });
